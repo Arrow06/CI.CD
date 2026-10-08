@@ -1,0 +1,45 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerHubUsername: 'arrow06'
+  imageRepository: 'items-api'
+  dockerRegistryServiceConnection: 'dockerhub-connection'
+
+stages:
+  - stage: BuildAndTest
+    displayName: 'a. Збирання проєкту та b. Unit-тести'
+    jobs:
+      - job: MavenBuildAndTest
+        displayName: 'Maven Build & Test'
+        steps:
+          - task: Maven@4
+            displayName: 'Запуск компіляції та модульних тестів'
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'clean test'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.17'
+
+  - stage: DockerBuildAndPush
+    displayName: 'c, d, e. Збирання, тегування та публікація Docker-образу'
+    dependsOn: BuildAndTest
+    condition: succeeded()
+    jobs:
+      - job: DockerPush
+        displayName: 'Docker Build and Push'
+        steps:
+          - task: Docker@2
+            displayName: 'Збирання та публікація образу в Docker Hub'
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: '$(dockerHubUsername)/$(imageRepository)'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                latest
