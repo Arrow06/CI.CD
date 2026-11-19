@@ -1,8 +1,8 @@
 trigger:
-  - main
+  - master
 
 pool:
-  vmImage: 'Default'
+  vmImage: 'ubuntu-latest'
 
 variables:
   dockerHubUsername: 'arrow06'
