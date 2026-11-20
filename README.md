@@ -32,6 +32,8 @@ docker run -d -p 8080:8080 --name items-api items-api:latest
 ```
 
 ### 3. Перевірка роботи
+Адреси нижче працюють лише тоді, коли контейнер запущено на вашому комп'ютері (крок 2).
+
 * API: http://localhost:8080/api/items
 * Swagger UI: http://localhost:8080/swagger-ui/index.html
 * OpenAPI специфікація: http://localhost:8080/v3/api-docs
@@ -44,6 +46,8 @@ curl -X POST http://localhost:8080/api/items \
 ```
 
 ### Образ із Docker Hub
+Образ у Docker Hub зібрано для платформи `linux/arm64` (Apple Silicon). На комп'ютерах з Intel/AMD він запускається лише через емуляцію, тому там краще зібрати образ локально (крок 1).
+
 ```bash
 docker pull arrow06/items-api:latest
 docker run -d -p 8080:8080 arrow06/items-api:latest
@@ -62,3 +66,5 @@ Pipeline описано у файлі `azure-pipelines.yml`. Він автома
 3. збирання Docker-образу;
 4. присвоєння тегу `latest`;
 5. публікацію образу в Docker Hub (`arrow06/items-api`).
+
+Pipeline виконується на self-hosted агенті `mac-agent` (пул `Default`), бо хмарні агенти Microsoft для організації недоступні. Щоб pipeline запустився, комп'ютер з агентом має бути увімкнений.
