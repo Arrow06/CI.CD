@@ -2,7 +2,7 @@ trigger:
   - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Default'
 
 variables:
   dockerHubUsername: 'arrow06'
@@ -24,7 +24,7 @@ stages:
               publishJUnitResults: true
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.17'
+              jdkVersionOption: 'default'
 
   - stage: DockerBuildAndPush
     displayName: 'c, d, e. Збирання, тегування та публікація Docker-образу'
