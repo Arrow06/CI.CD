@@ -68,3 +68,11 @@ Pipeline описано у файлі `azure-pipelines.yml`. Він автома
 5. публікацію образу в Docker Hub (`arrow06/items-api`).
 
 Pipeline виконується на self-hosted агенті `mac-agent` (пул `Default`), бо хмарні агенти Microsoft для організації недоступні. Щоб pipeline запустився, комп'ютер з агентом має бути увімкнений.
+
+## CI (GitHub Actions)
+Workflow `.github/workflows/ci.yml` запускається після push у гілки `master`, `feature/*` і `bugfix/*`. Зміни лише в папці `docs/` або у файлі `README.md` його не запускають.
+
+* `build-n-test` — збирання проєкту та unit-тести (`./mvnw -B clean package`).
+* `docker-pack-n-push` — reusable workflow `.github/workflows/docker-pack-n-push.yml`. Для `master` він публікує образ `arrow06/items-api-gha:latest` у Docker Hub, для інших гілок зберігає образ як артефакт workflow `docker-image`.
+
+Облікові дані Docker Hub зберігаються в GitHub Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
