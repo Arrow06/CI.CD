@@ -32,7 +32,7 @@ docker run -d -p 8080:8080 --name items-api items-api:latest
 ```
 
 ### 3. Перевірка роботи
-Адреси нижче працюють лише тоді, коли контейнер запущено на вашому комп'ютері (крок 2).
+Адреси нижче працюють лише тоді, коли контейнер запущено на комп'ютері (крок 2).
 
 * API: http://localhost:8080/api/items
 * Swagger UI: http://localhost:8080/swagger-ui/index.html
@@ -46,7 +46,7 @@ curl -X POST http://localhost:8080/api/items \
 ```
 
 ### Образ із Docker Hub
-Образ у Docker Hub зібрано для платформи `linux/arm64` (Apple Silicon). На комп'ютерах з Intel/AMD він запускається лише через емуляцію, тому там краще зібрати образ локально (крок 1).
+Образ у Docker Hub зібрано для платформи `linux/arm64`. На комп'ютерах з Intel/AMD він запускається лише через емуляцію.
 
 ```bash
 docker pull arrow06/items-api:latest
