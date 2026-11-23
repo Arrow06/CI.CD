@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+target/
+mailmap.txt
+.idea/
+*.iml
+.DS_Store
