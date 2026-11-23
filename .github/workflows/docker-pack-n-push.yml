@@ -1,7 +1,5 @@
 name: docker-pack-n-push
 
-# Reusable workflow: збирає Docker-образ і публікує його в Docker Hub
-# або (якщо push = false) зберігає образ як артефакт workflow.
 on:
   workflow_call:
     inputs:
