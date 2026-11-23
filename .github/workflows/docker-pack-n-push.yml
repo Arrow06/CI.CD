@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       repository:
-        description: 'Репозиторій у Docker Hub, наприклад arrow06/items-api-gha'
+        description: 'Репозиторій у Docker Hub'
         type: string
         required: true
       tag:
