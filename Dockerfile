@@ -7,6 +7,7 @@ RUN mvn clean package -DskipTests
 
 # Етап створення фінального образу
 FROM eclipse-temurin:17-jre
+LABEL org.opencontainers.image.source="https://github.com/Arrow06/CI.CD"
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
