@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "items-app.apiName" . }}
+  labels:
+    {{- include "items-app.componentLabels" (dict "root" . "component" "api") | nindent 4 }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "api") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "api") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/api-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/db-secret.yaml") . | sha256sum }}
+    spec:
+      {{- if .Values.migration.enabled }}
+      # Сервер стартує лише після того, як Job застосував міграції (сервер перевіряє схему під час старту)
+      initContainers:
+        - name: wait-for-migrations
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+          env:
+            - name: PGHOST
+              value: {{ include "items-app.dbName" . }}
+            - name: PGPORT
+              value: {{ .Values.database.port | quote }}
+            - name: PGDATABASE
+              value: {{ .Values.database.name | quote }}
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "items-app.dbSecretName" . }}
+                  key: DB_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "items-app.dbSecretName" . }}
+                  key: DB_PASSWORD
+          command:
+            - sh
+            - -c
+            - |
+              until psql -tAc "select 1 from flyway_schema_history where success limit 1" 2>/dev/null | grep -q 1; do
+                echo "waiting for database migrations..."; sleep 3
+              done
+              echo "migrations applied"
+      {{- end }}
+      containers:
+        - name: api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "items-app.apiName" . }}-cm
+            - secretRef:
+                name: {{ include "items-app.dbSecretName" . }}
+          readinessProbe:
+            httpGet:
+              path: /api/items
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}

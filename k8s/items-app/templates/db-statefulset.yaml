@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "items-app.dbName" . }}
+  labels:
+    {{- include "items-app.componentLabels" (dict "root" . "component" "database") | nindent 4 }}
+spec:
+  serviceName: {{ include "items-app.dbName" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "database") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "database") | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/db-secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.database.port }}
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.database.name | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "items-app.dbSecretName" . }}
+                  key: DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "items-app.dbSecretName" . }}
+                  key: DB_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.database.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  # PersistentVolumeClaim для кожного Pod бази даних; PersistentVolume створює provisioner StorageClass
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "database") | nindent 10 }}
+      spec:
+        accessModes:
+          - {{ .Values.database.persistence.accessMode }}
+        storageClassName: {{ .Values.database.persistence.storageClass.name }}
+        resources:
+          requests:
+            storage: {{ .Values.database.persistence.size }}

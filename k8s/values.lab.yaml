@@ -1,0 +1,12 @@
+# Налаштування середовища "lab" (локальний кластер kind).
+# Використання: helm upgrade --install lab k8s/items-app -n webapp-lab --create-namespace -f k8s/values.lab.yaml
+
+ingress:
+  host: webapp.lab.test
+
+database:
+  name: items_lab
+  user: items_lab
+  password: lab-password
+  persistence:
+    size: 512Mi

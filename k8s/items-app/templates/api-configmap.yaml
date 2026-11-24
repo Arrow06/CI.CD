@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "items-app.apiName" . }}-cm
+  labels:
+    {{- include "items-app.componentLabels" (dict "root" . "component" "api") | nindent 4 }}
+data:
+  # ConnectionString до бази даних поточного середовища
+  DB_URL: {{ include "items-app.dbUrl" . | quote }}

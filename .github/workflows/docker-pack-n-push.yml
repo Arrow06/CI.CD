@@ -23,6 +23,14 @@ on:
         description: 'Контекст збирання'
         type: string
         default: '.'
+      platforms:
+        description: 'Платформи образу для публікації в Docker Hub'
+        type: string
+        default: 'linux/amd64,linux/arm64'
+      artifact-name:
+        description: 'Назва артефакту з образом'
+        type: string
+        default: 'docker-image'
       artifact-retention-days:
         description: 'Скільки днів зберігати артефакт з образом'
         type: number
@@ -41,6 +49,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Set up QEMU
+        if: ${{ inputs.push }}
+        uses: docker/setup-qemu-action@v4
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -57,6 +69,7 @@ jobs:
         with:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
+          platforms: ${{ inputs.platforms }}
           tags: ${{ inputs.repository }}:${{ inputs.tag }}
           push: true
 
@@ -73,6 +86,6 @@ jobs:
         if: ${{ !inputs.push }}
         uses: actions/upload-artifact@v7
         with:
-          name: docker-image
+          name: ${{ inputs.artifact-name }}
           path: ${{ runner.temp }}/image.tar
           retention-days: ${{ inputs.artifact-retention-days }}

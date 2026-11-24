@@ -36,3 +36,6 @@ mailmap.txt
 .idea/
 *.iml
 .DS_Store
+
+# Резервна копія історії git
+backup.git/

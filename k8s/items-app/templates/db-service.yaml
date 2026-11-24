@@ -1,0 +1,15 @@
+# Headless Service: стабільне DNS-ім'я для Pod StatefulSet бази даних
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "items-app.dbName" . }}
+  labels:
+    {{- include "items-app.componentLabels" (dict "root" . "component" "database") | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "database") | nindent 4 }}
+  ports:
+    - name: postgres
+      port: {{ .Values.database.port }}
+      targetPort: postgres

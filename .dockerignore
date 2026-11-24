@@ -7,3 +7,8 @@ target/
 *.pdf
 *.md
 .DS_Store
+frontend/
+migrator/
+k8s/
+dist/
+backup.git/

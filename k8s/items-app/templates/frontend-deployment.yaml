@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "items-app.frontendName" . }}
+  labels:
+    {{- include "items-app.componentLabels" (dict "root" . "component" "frontend") | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "frontend") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "items-app.componentSelectorLabels" (dict "root" . "component" "frontend") | nindent 8 }}
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.containerPort }}
+          env:
+            # Адреса API для браузера (записується в config.js)
+            - name: API_BASE_URL
+              value: {{ .Values.frontend.apiBaseUrl | quote }}
+            # Адреса бекенду для проксі /api у nginx (доступ через port-forward)
+            - name: API_UPSTREAM
+              value: {{ include "items-app.apiUpstream" . | quote }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}

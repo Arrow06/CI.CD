@@ -1,0 +1,22 @@
+Release "{{ .Release.Name }}" встановлено в namespace "{{ .Release.Namespace }}".
+
+Компоненти:
+  - frontend:  {{ include "items-app.frontendName" . }} ({{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }})
+  - api:       {{ include "items-app.apiName" . }} ({{ .Values.api.image.repository }}:{{ .Values.api.image.tag }})
+  - database:  {{ include "items-app.dbName" . }} (StatefulSet, PVC {{ .Values.database.persistence.size }})
+{{- if .Values.migration.enabled }}
+  - migration: Job {{ include "items-app.migrationName" . }}-{{ .Release.Revision }}
+{{- end }}
+
+Перевірити стан:
+  kubectl -n {{ .Release.Namespace }} get all,pvc,ingress
+
+{{- if .Values.ingress.enabled }}
+
+Застосунок доступний через Ingress: http://{{ .Values.ingress.host }}/
+  (ім'я {{ .Values.ingress.host }} має вказувати на адресу NGINX Ingress Controller, наприклад через /etc/hosts)
+{{- end }}
+
+Доступ без Ingress (port-forward):
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "items-app.frontendName" . }} 8081:{{ .Values.frontend.service.port }}
+  і відкрийте http://localhost:8081/

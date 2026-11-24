@@ -1,0 +1,12 @@
+apiVersion: v2
+name: items-app
+description: >-
+  Розподілене рішення Items: React-фронтенд, Spring Boot API, база даних PostgreSQL
+  та Job міграцій бази даних (Flyway).
+type: application
+
+# Версія Helm chart. Збільшується при кожній зміні chart або його шаблонів.
+version: 0.1.0
+
+# Версія застосунку, що розгортається цим chart.
+appVersion: "1.0.0"
