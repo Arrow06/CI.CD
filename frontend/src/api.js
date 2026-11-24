@@ -1,6 +1,3 @@
-// Базова адреса API береться з window.APP_CONFIG (config.js).
-// Порожній рядок означає той самий хост, з якого відкрито сторінку: у Kubernetes
-// Ingress спрямовує /api на бекенд, а / на фронтенд.
 const baseUrl = (window.APP_CONFIG?.apiBaseUrl ?? '').replace(/\/$/, '');
 const itemsUrl = `${baseUrl}/api/items`;
 
